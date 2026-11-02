@@ -8,9 +8,9 @@ import { Citrus, Pine } from './Scenery'
 import { Ink, Paint } from './Paint'
 import TeapotHouse3D from './TeapotHouse3D'
 import { ramp } from './toon'
+import { Boats, Dolhareubang, Islets, Oreums, StoneWalls } from './JejuExtras'
+import { SEA_Y, SURFACE, heightAt, makeBrickTexture, toXZ } from './jejuTerrain'
 
-// 위도·경도 → 3D 좌표 (제주 중심 북위 33.38, 동경 126.55 기준. 경도 1°가 위도 1°보다 짧아서 0.84배)
-const toXZ = (lat, lng) => [(lng - 126.55) * 17, (33.38 - lat) * 20]
 const [hallasanX, hallasanZ] = toXZ(33.3617, 126.5292)
 
 // 제주 해안선 (대략적인 윤곽, [경도, 위도] 시계 방향)
@@ -118,7 +118,6 @@ function useScenery() {
   }, [])
 }
 
-const SURFACE = 0.4   // 섬 윗면 높이
 
 // 섬: 윤곽선을 둥글게 부풀린 판 + 아래로 매달린 흙 덩어리 (떠 있는 디오라마)
 function useIslandGeometries() {
@@ -134,7 +133,7 @@ function useIslandGeometries() {
     const top = new THREE.ExtrudeGeometry(shape, {
       depth: 0.3, bevelEnabled: true, bevelThickness: 0.12, bevelSize: 0.14, bevelSegments: 6, curveSegments: 24,
     })
-    const under = new THREE.ExtrudeGeometry(shape, { depth: 0.6, bevelEnabled: false })
+    const under = new THREE.ExtrudeGeometry(shape, { depth: 1.5, bevelEnabled: false })
     return { top, under }
   }, [])
 }
@@ -162,7 +161,7 @@ function Pin({ house, pos, selected, onSelect }) {
   const [x, z] = pos
   const active = selected || hover
   return (
-    <group position={[x, SURFACE, z]} scale={active ? 1.6 : 1.2}
+    <group position={[x, SURFACE + heightAt(x, z), z]} scale={active ? 1.6 : 1.2}
       onClick={(e) => { e.stopPropagation(); onSelect(house) }}
       onPointerOver={(e) => { e.stopPropagation(); setHover(true); document.body.style.cursor = 'pointer' }}
       onPointerOut={() => { setHover(false); document.body.style.cursor = 'auto' }}>
@@ -198,7 +197,7 @@ function FitCamera() {
   const { width, height } = useThree((s) => s.size)
   useEffect(() => {
     const f = Math.min(2.1, Math.max(1, 1.35 / (width / height)))
-    camera.position.set(0, 11 * f, 10 * f)
+    camera.position.set(7 * f, 7.6 * f, 10 * f)
     camera.lookAt(0, 0, 0)
   }, [camera, width, height])
   return null
@@ -208,16 +207,17 @@ export default function Jeju3D({ houses = [], selectedId, onSelect, height = 520
   const { top, under } = useIslandGeometries()
   const { pines, citrus, canola } = useScenery()
   const pinPos = useMemo(() => spreadPins(houses), [houses])
+  const brick = useMemo(() => makeBrickTexture(), [])
   const topMaterials = useMemo(() => [
     new THREE.MeshToonMaterial({ color: C.grass, gradientMap: ramp }),
-    new THREE.MeshToonMaterial({ color: C.earth, gradientMap: ramp }),
+    new THREE.MeshToonMaterial({ color: '#97B06A', gradientMap: ramp }),   // 돌벽 위로 늘어진 잔디 단
   ], [])
   return (
     <div className="dd-3d">
       <svg width="0" height="0" style={{ position: 'absolute' }} aria-hidden="true">
         <filter id="dd-paint"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="8" result="n" /><feDisplacementMap in="SourceGraphic" in2="n" scale="3" /></filter>
       </svg>
-    <Canvas camera={{ position: [0, 11, 10], fov: 50 }} style={{ height }}>
+    <Canvas camera={{ position: [7, 7.6, 10], fov: 50 }} style={{ height }}>
       <FitCamera />
       <color attach="background" args={[C.bg]} />
       <fog attach="fog" args={[C.bg, 30, 80]} />
@@ -225,25 +225,31 @@ export default function Jeju3D({ houses = [], selectedId, onSelect, height = 520
       <directionalLight position={[6, 10, 4]} intensity={1.6} color="#ffeccc" />
 
       {/* 바다: 섬 둘레의 얕은 물 + 넓은 바다 (섬이 바다 위로 솟은 모양) */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.12, 0]}>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, SEA_Y, 0]}>
         <circleGeometry args={[48, 64]} /><meshBasicMaterial color={C.sea} />
       </mesh>
-      <mesh geometry={under} rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.14, 0]} scale={[1.14, 1.14, 0.02]}>
+      <mesh geometry={under} rotation={[-Math.PI / 2, 0, 0]} position={[0, SEA_Y + 0.02, 0]} scale={[1.12, 1.12, 0.02]}>
         <meshBasicMaterial color={C.shallow} />
       </mesh>
 
       {/* 제주섬: 풀밭 윗판(위: 풀색, 옆: 흙색) + 아래로 매달린 흙 */}
       <mesh geometry={top} rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.1, 0]}
         material={topMaterials}><Ink thickness={0.03} /></mesh>
-      <mesh geometry={under} rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.5, 0]} scale={[0.94, 0.94, 1]}>
-        <Paint color={C.earthDeep} /><Ink thickness={0.03} />
+      {/* 돌을 쌓은 두꺼운 옆면 */}
+      <mesh geometry={under} rotation={[-Math.PI / 2, 0, 0]} position={[0, -1.4, 0]} scale={[0.99, 0.99, 1]}>
+        <Paint color="#ffffff" map={brick} /><Ink thickness={0.03} />
       </mesh>
 
       <Hallasan />
-      {pines.map((p, i) => <Pine key={`p${i}`} position={[p.x, SURFACE, p.z]} scale={p.s} />)}
-      {citrus.map((p, i) => <Citrus key={`c${i}`} position={[p.x, SURFACE, p.z]} scale={p.s} />)}
+      <Oreums />
+      <StoneWalls />
+      <Dolhareubang />
+      <Islets />
+      <Boats />
+      {pines.map((p, i) => <Pine key={`p${i}`} position={[p.x, SURFACE + heightAt(p.x, p.z), p.z]} scale={p.s} />)}
+      {citrus.map((p, i) => <Citrus key={`c${i}`} position={[p.x, SURFACE + heightAt(p.x, p.z), p.z]} scale={p.s} />)}
       {canola.map((p, i) => (
-        <mesh key={`f${i}`} position={[p.x, SURFACE + 0.03, p.z]}><sphereGeometry args={[0.06, 8, 8]} /><Paint color={C.canola} /></mesh>
+        <mesh key={`f${i}`} position={[p.x, SURFACE + 0.03 + heightAt(p.x, p.z), p.z]}><sphereGeometry args={[0.06, 8, 8]} /><Paint color={C.canola} /></mesh>
       ))}
 
       {/* 지역 이름표 */}
@@ -268,6 +274,8 @@ export default function Jeju3D({ houses = [], selectedId, onSelect, height = 520
     </div>
   )
 }
+
+
 
 
 
