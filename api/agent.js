@@ -134,7 +134,13 @@ export default async function handler(req, res) {
     }
     res.status(200).json({ answer: '도구 호출이 너무 많아 중단했어요. 질문을 좁혀 주세요.', steps });
   } catch (e) {
-    // 429 = 호출 한도 초과, 401 = 키 오류
-    res.status(e.status ?? 500).json({ error: e.status === 429 ? '사용량이 많아요. 1분 뒤 다시 시도하세요.' : e.message });
+    // 진짜 원인은 서버 로그(Vercel > Logs)에 남기고, 방문자에게는 쉬운 말만 보여줘요.
+    console.error('[agent]', e.status ?? '', e.message);
+    const msg = String(e.message ?? '');
+    let friendly = '할망이 잠깐 말문이 막혔어. 잠시 뒤에 다시 물어봐 주렴.';
+    if (/credit balance|billing/i.test(msg)) friendly = '지금은 할망이 쉬고 있어. (AI를 쓸 수 있는 한도를 다 써서 잠시 답할 수 없어.) 나중에 다시 와 주렴.';
+    else if (e.status === 429) friendly = '지금 물어보는 사람이 많구나. 1분 뒤에 다시 물어봐 주렴.';
+    else if (e.status === 401 || e.status === 403 || /authentication|api key/i.test(msg)) friendly = '할망을 부르는 열쇠에 문제가 있어. 관리자에게 알려 주렴.';
+    res.status(503).json({ error: friendly });
   }
 }

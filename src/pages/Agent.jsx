@@ -62,7 +62,7 @@ function Chat() {
             </div>
           )}
           {messages.map((m, i) => (
-            <div key={i} className={`msg ${m.role}`}>
+            <div key={i} className={`msg ${m.role} ${m.error ? 'error' : ''}`}>
               {m.steps?.length > 0 && (
                 <div className="small text-muted mb-1">
                   <i className="bi bi-tools me-1" />에이전트가 호출한 도구:{' '}

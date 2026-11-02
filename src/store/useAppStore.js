@@ -114,13 +114,14 @@ export const useAppStore = create(
       messages: [],          // { role: 'user' | 'assistant', text, steps }
       chatLoading: false,
       sendMessage: async (text) => {
-        const history = get().messages.map((m) => ({ role: m.role, content: m.text }))  // Claude 형식
+        const history = get().messages.filter((m) => !m.error).map((m) => ({ role: m.role, content: m.text }))  // Claude 형식
         set({ messages: [...get().messages, { role: 'user', text }], chatLoading: true })
         try {
           const { answer, steps } = await askAgent(text, history)
           set({ messages: [...get().messages, { role: 'assistant', text: answer, steps }] })
         } catch (e) {
-          get().toast(e.message, 'danger')
+          // 실패해도 채팅창에 할망의 말로 남겨요 (토스트는 금방 사라져서)
+          set({ messages: [...get().messages, { role: 'assistant', text: e.message, error: true }] })
         } finally {
           set({ chatLoading: false })
         }

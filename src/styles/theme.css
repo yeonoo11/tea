@@ -369,3 +369,5 @@ a:hover { color: var(--dd-accent); }
 .dd-weather-cards p { margin: .2rem 0 0; font-size: .88rem; }
 
 
+.chat-box .msg.error { background: rgba(191, 134, 96, .16); border: 1px dashed var(--dd-accent); }
+
