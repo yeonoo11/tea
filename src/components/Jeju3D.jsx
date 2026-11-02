@@ -130,17 +130,22 @@ function Pin({ house, selected, onSelect }) {
   const [x, z] = toXZ(house.lat, house.lng)
   const active = selected || hover
   return (
-    <group position={[x, SURFACE, z]} scale={active ? 3.8 : 3}
+    <group position={[x, SURFACE, z]} scale={active ? 1.9 : 1.45}
       onClick={(e) => { e.stopPropagation(); onSelect(house) }}
       onPointerOver={(e) => { e.stopPropagation(); setHover(true); document.body.style.cursor = 'pointer' }}
       onPointerOut={() => { setHover(false); document.body.style.cursor = 'auto' }}>
+      {/* 작아진 집을 누르기 쉽게, 보이지 않는 넉넉한 클릭 영역 */}
+      <mesh position={[0, 0.14, 0]}>
+        <sphereGeometry args={[0.34, 12, 10]} />
+        <meshBasicMaterial transparent opacity={0} depthWrite={false} />
+      </mesh>
       <mesh position={[0, 0.09, 0]}><boxGeometry args={[0.26, 0.18, 0.24]} /><Paint color={C.wall} /></mesh>
       <mesh geometry={roofGeometry} position={[0, 0.18, 0]}>
         <Paint color={selected ? C.roofSelected : C.moss} />
       </mesh>
       <mesh position={[0, 0.06, 0.121]}><boxGeometry args={[0.07, 0.11, 0.01]} /><Paint color="#e9dcc0" /></mesh>
       {active && (
-        <Html position={[0, 0.7, 0]} center distanceFactor={9} style={{ pointerEvents: 'none' }}>
+        <Html position={[0, 0.62, 0]} center distanceFactor={9} style={{ pointerEvents: 'none' }}>
           <div className="dd-pin-label">{house.name}</div>
         </Html>
       )}
@@ -234,6 +239,7 @@ export default function Jeju3D({ houses = [], selectedId, onSelect, height = 520
     </div>
   )
 }
+
 
 
 
