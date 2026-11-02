@@ -1,27 +1,63 @@
 import { useEffect } from 'react'
-import { Col, Form, Row } from 'react-bootstrap'
+import { Link, useLocation } from 'react-router-dom'
 import PageHeader from '../components/PageHeader'
-import ItemCard from '../components/ItemCard'
 import { Empty, Loading } from '../components/Status'
 import { useAppStore } from '../store/useAppStore'
 
-// 즐겨찾기 — store 의 favorites 를 그대로 보여줍니다 (STEP 5)
+// 내 북마크 — 로그인한 사람의 북마크만 보여요 (Supabase favorites, 본인 것만 읽도록 설정)
 export default function My() {
-  const { nickname, setNickname, favorites, favLoading, loadFavorites } = useAppStore()
+  const { user, authReady, signOut, favorites, favLoading, loadFavorites, removeFavorite } = useAppStore()
+  const location = useLocation()
 
-  useEffect(() => { loadFavorites() }, [nickname, loadFavorites])
+  useEffect(() => { if (user) loadFavorites() }, [user, loadFavorites])
+
+  if (!authReady) return <Loading text="로그인 정보를 확인하는 중..." />
+
+  if (!user) {
+    return (
+      <>
+        <PageHeader title="내 북마크" subtitle="로그인하면 북마크한 찻집을 모아 볼 수 있어요." art="/images/dadam/oranges.png" artSide="right" />
+        <div className="dd-need-login">
+          <p>북마크는 로그인한 뒤에 쓸 수 있어요.</p>
+          <div className="d-flex flex-wrap gap-2">
+            <Link to="/login" state={{ from: location.pathname }} className="btn btn-primary">로그인</Link>
+            <Link to="/signup" state={{ from: location.pathname }} className="btn btn-outline-primary">회원가입</Link>
+          </div>
+        </div>
+      </>
+    )
+  }
 
   return (
     <>
-      <PageHeader icon="star" title="내 즐겨찾기" subtitle="Supabase favorites 테이블 — 안내서 STEP 5" />
-      <Form.Control className="mb-4" style={{ maxWidth: 320 }} placeholder="닉네임"
-        value={nickname} onChange={(e) => setNickname(e.target.value)} />
-      {favLoading ? <Loading /> : favorites.length === 0 ? <Empty text="아직 저장한 항목이 없어요" /> : (
-        <Row xs={1} sm={2} lg={3} className="g-3">
+      <PageHeader title="내 북마크" subtitle={`${user.nickname}님이 저장한 찻집이에요.`} art="/images/dadam/oranges.png" artSide="right" />
+
+      <div className="dd-account">
+        <div>
+          <strong>{user.nickname}</strong>
+          <span>{user.email}</span>
+        </div>
+        <button type="button" className="btn btn-outline-primary btn-sm" onClick={signOut}>
+          <i className="bi bi-box-arrow-right me-1" aria-hidden="true" />로그아웃
+        </button>
+      </div>
+
+      {favLoading ? <Loading /> : favorites.length === 0 ? (
+        <Empty text="아직 북마크한 찻집이 없어요. 찻집 카드의 북마크 버튼을 눌러 보세요." />
+      ) : (
+        <ul className="dd-fav-list">
           {favorites.map((f) => (
-            <Col key={f.id}><ItemCard title={f.title} badge={f.source} subtitle={new Date(f.created_at).toLocaleString('ko-KR')} /></Col>
+            <li key={f.id}>
+              <div>
+                {f.source === 'tea' ? <Link to={`/tea/${f.item_id}`}>{f.title}</Link> : f.title}
+                <small>{new Date(f.created_at).toLocaleDateString('ko-KR')}에 저장</small>
+              </div>
+              <button type="button" className="btn btn-sm btn-outline-primary" onClick={() => removeFavorite(f.id)} aria-label={`${f.title} 북마크 지우기`}>
+                <i className="bi bi-trash" aria-hidden="true" />
+              </button>
+            </li>
           ))}
-        </Row>
+        </ul>
       )}
     </>
   )

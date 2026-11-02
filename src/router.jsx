@@ -7,6 +7,7 @@ import TeaGuide from './pages/TeaGuide'
 import TeaMap from './pages/TeaMap'
 import Agent from './pages/Agent'
 import My from './pages/My'
+import Auth from './pages/Auth'
 import NotFound from './pages/NotFound'
 
 // ── 메뉴 목록 ────────────────────────────────────────────
@@ -31,6 +32,8 @@ export const router = createBrowserRouter([
       { path: 'map', element: <TeaMap /> },
       { path: 'agent', element: <Agent /> },
       { path: 'my', element: <My /> },
+      { path: 'login', element: <Auth mode="login" /> },
+      { path: 'signup', element: <Auth mode="signup" /> },
     ],
   },
 ])

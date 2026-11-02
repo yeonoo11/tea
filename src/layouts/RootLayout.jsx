@@ -1,6 +1,7 @@
 import { NavLink, Outlet, ScrollRestoration, useLocation } from 'react-router-dom'
 import { Container, Nav, Navbar, Toast, ToastContainer } from 'react-bootstrap'
 import { NAV_ITEMS } from '../router'
+import { useEffect } from 'react'
 import { useAppStore } from '../store/useAppStore'
 
 // 이름 옆의 작은 찻잎 (원본 SVG)
@@ -15,8 +16,11 @@ function Leaf() {
 
 export default function RootLayout() {
   const toasts = useAppStore((s) => s.toasts)
-  const nickname = useAppStore((s) => s.nickname)
+  const user = useAppStore((s) => s.user)
+  const signOut = useAppStore((s) => s.signOut)
+  const initAuth = useAppStore((s) => s.initAuth)
   const { pathname } = useLocation()
+  useEffect(() => { initAuth() }, [initAuth])   // 처음 한 번 로그인 여부를 확인해요
   const wide = pathname === '/map'   // 지도는 여백을 줄여 넓게
 
   return (
@@ -35,10 +39,18 @@ export default function RootLayout() {
               <Nav.Link as={NavLink} to="/my" eventKey="/my" aria-label="내 북마크">
                 <i className="bi bi-bookmark" aria-hidden="true" /><span className="d-md-none ms-2">내 북마크</span>
               </Nav.Link>
-              <Nav.Link as={NavLink} to="/my" eventKey="/my-user" aria-label="내 정보">
-                <i className="bi bi-person-circle" aria-hidden="true" />
-                <span className={nickname ? 'ms-2 small' : 'd-md-none ms-2'}>{nickname || '내 정보'}</span>
-              </Nav.Link>
+              {user ? (
+                <>
+                  <Nav.Link as={NavLink} to="/my" eventKey="/my-user" aria-label="내 정보">
+                    <i className="bi bi-person-circle" aria-hidden="true" /><span className="ms-2 small">{user.nickname}</span>
+                  </Nav.Link>
+                  <Nav.Link as="button" type="button" className="dd-logout" onClick={signOut}>로그아웃</Nav.Link>
+                </>
+              ) : (
+                <Nav.Link as={NavLink} to="/login" eventKey="/login" aria-label="로그인">
+                  <i className="bi bi-person-circle" aria-hidden="true" /><span className="ms-2 small">로그인</span>
+                </Nav.Link>
+              )}
             </Nav>
           </Navbar.Collapse>
         </Container>
