@@ -3,21 +3,21 @@ import { useFrame } from '@react-three/fiber'
 import { Html } from '@react-three/drei'
 import * as THREE from 'three'
 import { Ink, Paint } from './Paint'
-import { Pine } from './Scenery'
+import { RoundTree } from './Scenery'
 import { OREUMS, SEA_Y, SURFACE, heightAt, makeBrickTexture, toXZ } from './jejuTerrain'
 
 const SKIRT = '#97B06A'     // 잔디 단의 옆면 (돌벽 위로 늘어진 풀)
 const GRASS = '#B9C58D'
 const ROCK = '#B3A88F'
-const STONE = '#8F887D'
+const STONE = '#6F6B66'   // 현무암
 
 // 실제 오름과 바위산: 둥근 언덕(오름)과 뾰족한 바위산(성산일출봉·산방산)
 export function Oreums() {
   return OREUMS.map((o) => (
     <group key={o.name} position={[o.x, SURFACE, o.z]}>
       {o.rock ? (
-        <mesh position={[0, o.h * 0.5, 0]}>
-          <coneGeometry args={[o.r, o.h, 9, 1]} /><Paint color={ROCK} /><Ink thickness={0.02} />
+        <mesh scale={[o.r * 0.85, o.h * 1.15, o.r * 0.85]}>
+          <sphereGeometry args={[1, 20, 10, 0, Math.PI * 2, 0, Math.PI / 2]} /><Paint color={ROCK} /><Ink thickness={0.02} />
         </mesh>
       ) : (
         <mesh scale={[o.r, o.h, o.r]}>
@@ -58,8 +58,8 @@ export function Islets() {
           <Paint attach="material-2" color={SKIRT} />
           <Ink thickness={0.02} />
         </mesh>
-        <Pine position={[0.08, SURFACE, -0.05]} scale={0.9} />
-        <Pine position={[-0.14, SURFACE, 0.08]} scale={0.7} />
+        <RoundTree position={[0.08, SURFACE, -0.05]} scale={0.9} tone={1} />
+        <RoundTree position={[-0.14, SURFACE, 0.08]} scale={0.7} tone={2} />
         <Html position={[0, 0.85, 0]} center distanceFactor={11} style={{ pointerEvents: 'none' }}>
           <div className="dd-region-label">{s.name}</div>
         </Html>

@@ -68,3 +68,49 @@ export function makeBrickTexture() {
   tex.colorSpace = THREE.SRGBColorSpace
   return tex
 }
+
+// 수채화처럼 번진 얼룩 질감 (거의 흰색 바탕이라, 재질 색을 곱해서 집마다 다른 색을 낼 수 있어요)
+const wcCache = {}
+export function getWatercolorTexture(kind) {
+  if (wcCache[kind]) return wcCache[kind]
+  const S = 128
+  const canvas = document.createElement('canvas')
+  canvas.width = S
+  canvas.height = S
+  const g = canvas.getContext('2d')
+  g.fillStyle = '#FFFFFF'
+  g.fillRect(0, 0, S, S)
+  let seed = kind === 'thatch' ? 11 : kind === 'tile' ? 23 : 37
+  const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647
+  for (let i = 0; i < 46; i++) {   // 물감이 고인 듯 밝고 어두운 얼룩
+    g.fillStyle = i % 2 ? `rgba(255, 244, 220, ${0.1 + rnd() * 0.18})` : `rgba(120, 80, 40, ${0.04 + rnd() * 0.07})`
+    g.beginPath()
+    g.arc(rnd() * S, rnd() * S, 5 + rnd() * 20, 0, Math.PI * 2)
+    g.fill()
+  }
+  if (kind === 'thatch') {   // 볏짚 결
+    for (let i = 0; i < 130; i++) {
+      g.strokeStyle = `rgba(120, 85, 38, ${0.08 + rnd() * 0.12})`
+      g.lineWidth = 1
+      const x = rnd() * S
+      const y = rnd() * S
+      g.beginPath()
+      g.moveTo(x, y)
+      g.lineTo(x + rnd() * 6 - 3, y + 10 + rnd() * 14)
+      g.stroke()
+    }
+  }
+  if (kind === 'tile') {   // 기와 줄
+    g.strokeStyle = 'rgba(120, 60, 30, 0.16)'
+    g.lineWidth = 1.5
+    for (let y = 8; y < S; y += 16) {
+      g.beginPath(); g.moveTo(0, y); g.lineTo(S, y); g.stroke()
+      for (let x = ((y / 16) % 2) * 8; x < S; x += 16) { g.beginPath(); g.moveTo(x, y); g.lineTo(x, y + 16); g.stroke() }
+    }
+  }
+  const tex = new THREE.CanvasTexture(canvas)
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping
+  tex.colorSpace = THREE.SRGBColorSpace
+  wcCache[kind] = tex
+  return tex
+}

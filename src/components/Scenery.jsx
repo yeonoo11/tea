@@ -26,3 +26,17 @@ export function Citrus({ position, scale = 1 }) {
     </group>
   )
 }
+
+// 둥근 수채화 나무: 겹쳐 놓은 동글동글한 잎 덩어리 (색은 번호마다 조금씩 달라서 숲이 단조롭지 않아요)
+const CANOPY = [['#8FAE75', '#A6BF86'], ['#7FA06A', '#98B47C'], ['#9BB57C', '#B3C892'], ['#86A56D', '#9EB982']]
+export function RoundTree({ position, scale = 1, tone = 0 }) {
+  const [a, b] = CANOPY[tone % CANOPY.length]
+  return (
+    <group position={position} scale={scale}>
+      <mesh position={[0, 0.09, 0]}><cylinderGeometry args={[0.03, 0.045, 0.18, 6]} /><Paint color={C.trunk} /></mesh>
+      <mesh position={[0, 0.3, 0]}><sphereGeometry args={[0.2, 14, 10]} /><Paint color={a} /><Ink thickness={0.01} /></mesh>
+      <mesh position={[0.09, 0.4, 0.03]}><sphereGeometry args={[0.13, 12, 9]} /><Paint color={b} /></mesh>
+      <mesh position={[-0.08, 0.37, -0.04]}><sphereGeometry args={[0.11, 12, 9]} /><Paint color={b} /></mesh>
+    </group>
+  )
+}

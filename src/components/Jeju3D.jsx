@@ -4,9 +4,10 @@ import { OrbitControls, Html } from '@react-three/drei'
 import * as THREE from 'three'
 import { REGIONS } from '../../server/regions.js'
 import { C } from './palette'
-import { Citrus, Pine } from './Scenery'
+import { Citrus, RoundTree } from './Scenery'
 import { Ink, Paint } from './Paint'
-import TeapotHouse3D from './TeapotHouse3D'
+import TeaHouse3D from './TeaHouse3D'
+import TeaVillageDecor from './TeaVillageDecor'
 import { ramp } from './toon'
 import { Boats, Dolhareubang, Islets, Oreums, StoneWalls } from './JejuExtras'
 import { SEA_Y, SURFACE, heightAt, makeBrickTexture, toXZ } from './jejuTerrain'
@@ -155,7 +156,7 @@ function Hallasan() {
   )
 }
 
-// 찻집: 찻주전자 모양의 작은 집. 누르면 onSelect, 선택된 집은 커지고 주둥이에서 김이 올라와요 (초가·기와집 버전은 TeaHouse3D.jsx 에 남겨 뒀어요)
+// 찻집: 제주 전통 찻집 한 채와 소품. 마우스를 올리면 살짝 밝아지고, 누르면 onSelect 로 정보가 열려요 (찻주전자 모양 집은 TeapotHouse3D.jsx 에 남겨 뒀어요)
 function Pin({ house, pos, selected, onSelect }) {
   const [hover, setHover] = useState(false)
   const [x, z] = pos
@@ -170,7 +171,8 @@ function Pin({ house, pos, selected, onSelect }) {
         <sphereGeometry args={[0.34, 12, 10]} />
         <meshBasicMaterial transparent opacity={0} depthWrite={false} />
       </mesh>
-      <TeapotHouse3D id={house.id} selected={selected} />
+      <TeaHouse3D id={house.id} selected={selected} glow={active} />
+      <TeaVillageDecor id={house.id} />
       {active && (
         <Html position={[0, 0.62, 0]} center distanceFactor={9} style={{ pointerEvents: 'none' }}>
           <div className="dd-pin-label">{house.name}</div>
@@ -246,7 +248,7 @@ export default function Jeju3D({ houses = [], selectedId, onSelect, height = 520
       <Dolhareubang />
       <Islets />
       <Boats />
-      {pines.map((p, i) => <Pine key={`p${i}`} position={[p.x, SURFACE + heightAt(p.x, p.z), p.z]} scale={p.s} />)}
+      {pines.map((p, i) => <RoundTree key={`p${i}`} tone={i} position={[p.x, SURFACE + heightAt(p.x, p.z), p.z]} scale={p.s} />)}
       {citrus.map((p, i) => <Citrus key={`c${i}`} position={[p.x, SURFACE + heightAt(p.x, p.z), p.z]} scale={p.s} />)}
       {canola.map((p, i) => (
         <mesh key={`f${i}`} position={[p.x, SURFACE + 0.03 + heightAt(p.x, p.z), p.z]}><sphereGeometry args={[0.06, 8, 8]} /><Paint color={C.canola} /></mesh>
