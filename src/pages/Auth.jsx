@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom'
-import { isSupabaseReady } from '../lib/supabase'
+import { isSupabaseReady, supabaseProblem } from '../lib/supabase'
 import { useAppStore } from '../store/useAppStore'
 
 // 로그인(/login) · 회원가입(/signup) — Supabase Auth 를 써요.
@@ -70,7 +70,10 @@ export default function Auth({ mode }) {
       </p>
 
       {!isSupabaseReady && (
-        <div className="dd-notice">회원 기능은 Supabase 설정이 필요해요. <code>.env.local</code>(배포는 Vercel 환경 변수)에 <code>VITE_SUPABASE_URL</code>과 <code>VITE_SUPABASE_ANON_KEY</code>를 넣어 주세요.</div>
+        <div className="dd-notice">
+          회원 기능은 Supabase 설정이 필요해요.<br />{supabaseProblem}
+          <small className="d-block mt-1">내 컴퓨터는 <code>.env.local</code>, 배포는 Vercel의 Environment Variables 에서 고치고 다시 배포(Redeploy)해 주세요.</small>
+        </div>
       )}
 
       <form onSubmit={onSubmit} noValidate>
