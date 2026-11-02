@@ -4,7 +4,7 @@ import { Card, Col, Form, Row } from 'react-bootstrap'
 import { ping } from '../api/client'
 import { isSupabaseReady, supabase } from '../lib/supabase'
 import { useAppStore } from '../store/useAppStore'
-import WeatherBadge from '../components/WeatherBadge'
+import WeatherCard from '../components/WeatherCard'
 import FilterBar from '../components/FilterBar'
 import { GUIDE_TEAS } from '../data/teaGuide'
 import { REGIONS } from '../../server/regions.js'
@@ -103,8 +103,9 @@ export default function Home() {
           <Link to="/guide"><i className="bi bi-flower2" aria-hidden="true" />차 가이드</Link>
           <Link to="/map"><i className="bi bi-geo-alt" aria-hidden="true" />제주 지도</Link>
         </nav>
-        <div className="text-center pt-2"><WeatherBadge place="서귀포시" /></div>
       </section>
+
+      <WeatherCard />
 
       <section className="dd-below" aria-labelledby="home-teas">
         <div className="dd-below-head">

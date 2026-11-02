@@ -89,7 +89,6 @@ a:hover { color: var(--dd-accent); }
 
 /* 홈 문구 */
 .dd-intent { text-align: center; margin: 1.3rem 0 0; color: var(--dd-muted); font-size: .95rem; line-height: 1.7; }
-.dd-weather { font-size: .85rem; color: var(--dd-muted); }
 .dd-quick { display: flex; gap: .5rem; justify-content: center; flex-wrap: wrap; padding: 1rem 0 .5rem; }
 .dd-quick a { display: inline-flex; align-items: center; gap: .4rem; padding: .5rem 1.1rem; border: 1px solid var(--dd-line); border-radius: 999px; background: #fff; color: var(--dd-text); font-size: .9rem; }
 
@@ -356,4 +355,17 @@ a:hover { color: var(--dd-accent); }
 .dd-fav-list a { font-weight: 600; color: var(--dd-text); }
 .dd-fav-list small { display: block; color: var(--dd-muted); }
 .dd-logout { border: 0; background: none; font-size: .85rem; color: var(--dd-muted) !important; }
+
+
+/* ── 오늘의 제주 날씨 (공공데이터) ─────────────────────── */
+.dd-source { font-size: .8rem; color: var(--dd-muted); }
+.dd-weather-cards { list-style: none; padding: 0; margin: 0; display: grid; gap: 1rem; grid-template-columns: 1fr; }
+@media (min-width: 640px) { .dd-weather-cards { grid-template-columns: repeat(2, 1fr); } }
+.dd-weather-cards li { display: flex; gap: 1rem; align-items: center; background: #fff; border: 1px solid var(--dd-line); border-radius: 20px; padding: 1rem 1.3rem; }
+.dd-weather-cards li > i { font-size: 2.2rem; color: var(--dd-accent); }
+.dd-weather-cards strong { font-family: var(--dd-serif); margin-right: .5rem; }
+.dd-weather-cards .temp { font-size: 1.4rem; font-weight: 600; margin-right: .6rem; }
+.dd-weather-cards span { font-size: .9rem; color: var(--dd-muted); }
+.dd-weather-cards p { margin: .2rem 0 0; font-size: .88rem; }
+
 
