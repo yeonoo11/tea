@@ -24,6 +24,13 @@ await run('OSRM 길찾기', async () => {
   const r = await osrm.getTravelTime({ fromLng: 126.493, fromLat: 33.5113, toLng: 126.33, toLat: 33.46 })
   return `공항 → 애월 ${r.minutes}분, ${r.km}km`
 })
+const weather = await import('../server/weather.js')
+await run('기상청 날씨(공공데이터)', async () => {
+  if (!process.env.DATA_GO_KR_KEY) throw new Error('DATA_GO_KR_KEY 가 비어 있어요')
+  const r = await weather.getWeather({ place: '제주시' })
+  if (!r.length) throw new Error('응답은 왔지만 날씨 항목이 비어 있어요')
+  return `제주시 ${r[0].temp}℃, ${r[0].sky}, 강수확률 ${r[0].pop}%`
+})
 await run('Claude(할망 AI)', async () => {
   if (!process.env.ANTHROPIC_API_KEY) throw new Error('ANTHROPIC_API_KEY 가 비어 있어요')
   const { default: Anthropic } = await import('@anthropic-ai/sdk')
