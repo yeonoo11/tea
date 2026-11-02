@@ -31,6 +31,46 @@ function inCoast(lng, lat) {
   return inside
 }
 
+// 같은 동네에 찻집이 여럿이면 집이 한곳에 겹쳐요. 실제 위치는 최대한 지키면서, 가까운 집끼리 서로 밀어내 간격을 벌려요.
+const MIN_GAP = 0.7        // 집 사이 최소 간격 (지도 단위)
+const MAX_SHIFT = 1.6      // 원래 자리에서 밀려날 수 있는 최대 거리
+const insideIsland = (x, z) => {
+  const lng = x / 17 + 126.55
+  const lat = 33.38 - z / 20
+  return inCoast(126.55 + (lng - 126.55) / 0.95, 33.38 + (lat - 33.38) / 0.95)   // 가장자리에 걸치지 않게 살짝 안쪽 기준
+}
+function spreadPins(houses) {
+  const pts = [...houses].sort((a, b) => String(a.id).localeCompare(String(b.id))).map((h) => {
+    const [x, z] = toXZ(h.lat, h.lng)
+    return { id: h.id, ox: x, oz: z, x, z }
+  })
+  const tryMove = (p, dx, dz) => {
+    const nx = p.x + dx
+    const nz = p.z + dz
+    if (Math.hypot(nx - p.ox, nz - p.oz) > MAX_SHIFT) return
+    if (!insideIsland(nx, nz)) return
+    p.x = nx
+    p.z = nz
+  }
+  for (let it = 0; it < 120; it++) {
+    for (let i = 0; i < pts.length; i++) {
+      for (let j = i + 1; j < pts.length; j++) {
+        const a = pts[i]
+        const b = pts[j]
+        let dx = b.x - a.x
+        let dz = b.z - a.z
+        let d = Math.hypot(dx, dz)
+        if (d >= MIN_GAP) continue
+        if (d < 1e-4) { const ang = (i * 2.4 + j) * 1.3; dx = Math.cos(ang); dz = Math.sin(ang); d = 1 }   // 완전히 같은 자리면 어느 방향으로든 갈라놔요
+        const push = (MIN_GAP - Math.hypot(b.x - a.x, b.z - a.z)) / 2 + 0.002
+        tryMove(a, -(dx / d) * push, -(dz / d) * push)
+        tryMove(b, (dx / d) * push, (dz / d) * push)
+      }
+    }
+  }
+  return new Map(pts.map((p) => [p.id, [p.x, p.z]]))
+}
+
 // 같은 숫자에서 늘 같은 "무작위"가 나오게 하는 함수 (나무 위치가 새로고침마다 바뀌지 않게)
 function seeded(seed) {
   let a = seed
@@ -125,9 +165,9 @@ const roofGeometry = (() => {
 })()
 
 // 찻집: 푸른 벽에 이끼 지붕의 작은 집. 누르면 onSelect, 선택된 집은 커지고 지붕이 붉게
-function Pin({ house, selected, onSelect }) {
+function Pin({ house, pos, selected, onSelect }) {
   const [hover, setHover] = useState(false)
-  const [x, z] = toXZ(house.lat, house.lng)
+  const [x, z] = pos
   const active = selected || hover
   return (
     <group position={[x, SURFACE, z]} scale={active ? 1.9 : 1.45}
@@ -141,7 +181,7 @@ function Pin({ house, selected, onSelect }) {
       </mesh>
       <mesh position={[0, 0.09, 0]}><boxGeometry args={[0.26, 0.18, 0.24]} /><Paint color={C.wall} /></mesh>
       <mesh geometry={roofGeometry} position={[0, 0.18, 0]}>
-        <Paint color={selected ? C.roofSelected : C.moss} />
+        <Paint color={selected ? C.roofSelected : C.roof} />
       </mesh>
       <mesh position={[0, 0.06, 0.121]}><boxGeometry args={[0.07, 0.11, 0.01]} /><Paint color="#e9dcc0" /></mesh>
       {active && (
@@ -179,6 +219,7 @@ function FitCamera() {
 export default function Jeju3D({ houses = [], selectedId, onSelect, height = 520 }) {
   const { top, under } = useIslandGeometries()
   const { pines, citrus, canola } = useScenery()
+  const pinPos = useMemo(() => spreadPins(houses), [houses])
   const topMaterials = useMemo(() => [
     new THREE.MeshToonMaterial({ color: C.grass, gradientMap: ramp }),
     new THREE.MeshToonMaterial({ color: C.earth, gradientMap: ramp }),
@@ -228,7 +269,7 @@ export default function Jeju3D({ houses = [], selectedId, onSelect, height = 520
       })}
 
       {houses.map((h) => (
-        <Pin key={h.id} house={h} selected={h.id === selectedId} onSelect={onSelect} />
+        <Pin key={h.id} house={h} pos={pinPos.get(h.id)} selected={h.id === selectedId} onSelect={onSelect} />
       ))}
 
       <Cloud position={[-5.5, 4.2, -3]} />
@@ -239,6 +280,7 @@ export default function Jeju3D({ houses = [], selectedId, onSelect, height = 520
     </div>
   )
 }
+
 
 
 

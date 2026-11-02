@@ -12,7 +12,8 @@ export const C = {
   orange: '#E8943A',
   wall: '#F1E8DA',       // 찻집 벽
   moss: '#777D55',       // 찻집 지붕(올리브)
-  roofSelected: '#BF8660', // 선택된 찻집 지붕(테라코타)
+  roof: '#D9A57C',       // 찻집 지붕(연한 테라코타 — 올리브색 들판 위에서 눈에 띄게)
+  roofSelected: '#B5533A', // 선택된 찻집 지붕(진한 붉은 벽돌색)
   mountain: '#8FA89A',   // 한라산 중턱(푸른 초록)
   mountainHigh: '#7E9A8F',
   snow: '#F2F2EA',
@@ -20,4 +21,5 @@ export const C = {
   lake: '#9CC3D0',
   canola: '#F1C84B',
 }
+
 
