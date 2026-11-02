@@ -6,7 +6,7 @@ import { REGIONS } from '../../server/regions.js'
 import { C } from './palette'
 import { Citrus, Pine } from './Scenery'
 import { Ink, Paint } from './Paint'
-import TeaHouse3D from './TeaHouse3D'
+import TeapotHouse3D from './TeapotHouse3D'
 import { ramp } from './toon'
 
 // 위도·경도 → 3D 좌표 (제주 중심 북위 33.38, 동경 126.55 기준. 경도 1°가 위도 1°보다 짧아서 0.84배)
@@ -33,8 +33,8 @@ function inCoast(lng, lat) {
 }
 
 // 같은 동네에 찻집이 여럿이면 집이 한곳에 겹쳐요. 실제 위치는 최대한 지키면서, 가까운 집끼리 서로 밀어내 간격을 벌려요.
-const MIN_GAP = 0.7        // 집 사이 최소 간격 (지도 단위)
-const MAX_SHIFT = 1.6      // 원래 자리에서 밀려날 수 있는 최대 거리
+const MIN_GAP = 0.95       // 집 사이 최소 간격 (지도 단위)
+const MAX_SHIFT = 2.2      // 원래 자리에서 밀려날 수 있는 최대 거리
 const insideIsland = (x, z) => {
   const lng = x / 17 + 126.55
   const lat = 33.38 - z / 20
@@ -156,13 +156,13 @@ function Hallasan() {
   )
 }
 
-// 찻집: 제주 초가·기와집 모양의 작은 집. 누르면 onSelect, 선택된 집은 커지고 바닥에 따뜻한 고리가 생겨요
+// 찻집: 찻주전자 모양의 작은 집. 누르면 onSelect, 선택된 집은 커지고 주둥이에서 김이 올라와요 (초가·기와집 버전은 TeaHouse3D.jsx 에 남겨 뒀어요)
 function Pin({ house, pos, selected, onSelect }) {
   const [hover, setHover] = useState(false)
   const [x, z] = pos
   const active = selected || hover
   return (
-    <group position={[x, SURFACE, z]} scale={active ? 1.9 : 1.45}
+    <group position={[x, SURFACE, z]} scale={active ? 1.6 : 1.2}
       onClick={(e) => { e.stopPropagation(); onSelect(house) }}
       onPointerOver={(e) => { e.stopPropagation(); setHover(true); document.body.style.cursor = 'pointer' }}
       onPointerOut={() => { setHover(false); document.body.style.cursor = 'auto' }}>
@@ -171,7 +171,7 @@ function Pin({ house, pos, selected, onSelect }) {
         <sphereGeometry args={[0.34, 12, 10]} />
         <meshBasicMaterial transparent opacity={0} depthWrite={false} />
       </mesh>
-      <TeaHouse3D id={house.id} selected={selected} />
+      <TeapotHouse3D id={house.id} selected={selected} />
       {active && (
         <Html position={[0, 0.62, 0]} center distanceFactor={9} style={{ pointerEvents: 'none' }}>
           <div className="dd-pin-label">{house.name}</div>
@@ -268,6 +268,8 @@ export default function Jeju3D({ houses = [], selectedId, onSelect, height = 520
     </div>
   )
 }
+
+
 
 
 
