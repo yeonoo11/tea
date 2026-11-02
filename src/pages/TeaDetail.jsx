@@ -67,7 +67,7 @@ export default function TeaDetail() {
         <Col lg={5}>
           <h2 className="dd-section-title" id="reviews">블로그 후기</h2>
           {!reviews ? <Loading text="후기 찾는 중..." /> : reviews.error ? (
-            <div className="text-muted small">후기를 불러오지 못했어요.</div>
+            <div className="text-muted small">블로그 후기를 지금은 불러올 수 없어요. <a href={house.url} target="_blank" rel="noreferrer">카카오맵에서 후기 보기</a></div>
           ) : reviews.length === 0 ? (
             <div className="text-muted small">후기를 찾지 못했어요.</div>
           ) : (
