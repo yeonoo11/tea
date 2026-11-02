@@ -6,6 +6,7 @@ import { REGIONS } from '../../server/regions.js'
 import { C } from './palette'
 import { Citrus, Pine } from './Scenery'
 import { Ink, Paint } from './Paint'
+import TeaHouse3D from './TeaHouse3D'
 import { ramp } from './toon'
 
 // 위도·경도 → 3D 좌표 (제주 중심 북위 33.38, 동경 126.55 기준. 경도 1°가 위도 1°보다 짧아서 0.84배)
@@ -155,16 +156,7 @@ function Hallasan() {
   )
 }
 
-// 삼각 지붕 단면 (지붕 모양을 만들 때 쓰는 삼각기둥)
-const roofGeometry = (() => {
-  const s = new THREE.Shape()
-  s.moveTo(-0.17, 0); s.lineTo(0.17, 0); s.lineTo(0, 0.16); s.closePath()
-  const g = new THREE.ExtrudeGeometry(s, { depth: 0.3, bevelEnabled: false })
-  g.translate(0, 0, -0.15)
-  return g
-})()
-
-// 찻집: 푸른 벽에 이끼 지붕의 작은 집. 누르면 onSelect, 선택된 집은 커지고 지붕이 붉게
+// 찻집: 제주 초가·기와집 모양의 작은 집. 누르면 onSelect, 선택된 집은 커지고 바닥에 따뜻한 고리가 생겨요
 function Pin({ house, pos, selected, onSelect }) {
   const [hover, setHover] = useState(false)
   const [x, z] = pos
@@ -179,11 +171,7 @@ function Pin({ house, pos, selected, onSelect }) {
         <sphereGeometry args={[0.34, 12, 10]} />
         <meshBasicMaterial transparent opacity={0} depthWrite={false} />
       </mesh>
-      <mesh position={[0, 0.09, 0]}><boxGeometry args={[0.26, 0.18, 0.24]} /><Paint color={C.wall} /></mesh>
-      <mesh geometry={roofGeometry} position={[0, 0.18, 0]}>
-        <Paint color={selected ? C.roofSelected : C.roof} />
-      </mesh>
-      <mesh position={[0, 0.06, 0.121]}><boxGeometry args={[0.07, 0.11, 0.01]} /><Paint color="#e9dcc0" /></mesh>
+      <TeaHouse3D id={house.id} selected={selected} />
       {active && (
         <Html position={[0, 0.62, 0]} center distanceFactor={9} style={{ pointerEvents: 'none' }}>
           <div className="dd-pin-label">{house.name}</div>
@@ -280,6 +268,7 @@ export default function Jeju3D({ houses = [], selectedId, onSelect, height = 520
     </div>
   )
 }
+
 
 
 
