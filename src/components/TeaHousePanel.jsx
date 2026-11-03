@@ -6,7 +6,7 @@ import { featureOf } from '../data/filters'
 
 // 핀을 누르면 나오는 "찻집 미리보기" 카드
 // 기본 정보·사진(카카오) + 제주공항에서 이동 시간(OSRM). 후기는 카카오맵 링크로 연결해요
-export default function TeaHousePanel({ house, real = false, onToggleView }) {
+export default function TeaHousePanel({ house }) {
   const addFavorite = useAppStore((s) => s.addFavorite)
   const { travel, photos } = useTeaExtras(house)
   const feature = featureOf(house)
@@ -41,11 +41,6 @@ export default function TeaHousePanel({ house, real = false, onToggleView }) {
 
         <div className="actions">
           <Link to={`/tea/${house.id}`} className="btn btn-primary">상세 보기</Link>
-          {onToggleView && (
-            <button type="button" className="btn btn-outline-primary" onClick={onToggleView}>
-              <i className={`bi ${real ? 'bi-box' : 'bi-map'} me-1`} aria-hidden="true" />{real ? '3D 모형에서 보기' : '실제 지도에서 보기'}
-            </button>
-          )}
         </div>
 
         <a className="small fw-bold" href={house.url} target="_blank" rel="noreferrer">

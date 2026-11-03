@@ -102,7 +102,7 @@ export const useAppStore = create(
       teaError: '',
       selectedHouse: null,
       selectHouse: (selectedHouse) => set({ selectedHouse }),
-      // 설문대할망이 추천한 찻집 — 지도에서 이 집들을 밝히고 카메라가 그쪽으로 날아가요 ({ ids, key })
+      // 설문대할망이 추천한 찻집 — 실제 지도에서 이 집들을 금색으로 표시하고 그 주변을 보여 줘요 ({ ids, key })
       mapHighlight: null,
       highlightOnMap: (ids) => set({ mapHighlight: ids?.length ? { ids: ids.map(String), key: Date.now() } : null }),
       loadTeaHouses: async () => {

@@ -24,7 +24,7 @@ const pinSvg = (on, gold) => `data:image/svg+xml;utf8,${encodeURIComponent(
 
 const NONE = []   // 기본값을 매번 새로 만들지 않게
 
-export default function KakaoMap({ houses = [], selectedId, onSelect, highlightIds = NONE, height = 520 }) {
+export default function KakaoMap({ houses = [], selectedId, onSelect, highlightIds = NONE, flyKey, height = 520 }) {
   const box = useRef(null)
   const map = useRef(null)
   const markers = useRef(new Map())
@@ -76,6 +76,19 @@ export default function KakaoMap({ houses = [], selectedId, onSelect, highlightI
     const h = houses.find((x) => x.id === selectedId)
     if (h) { map.current.setLevel(5); map.current.panTo(new kakao.maps.LatLng(h.lat, h.lng)) }
   }, [ready, selectedId, houses, highlightIds])
+
+  // 추천이 새로 들어오면 추천 찻집이 모두 보이도록 지도 범위를 맞춰요
+  const hiRef = useRef(highlightIds)
+  hiRef.current = highlightIds
+  useEffect(() => {
+    if (!ready || !flyKey) return
+    const { kakao } = window
+    const pts = houses.filter((h) => hiRef.current.includes(String(h.id)))
+    if (!pts.length) return
+    const bounds = new kakao.maps.LatLngBounds()
+    pts.forEach((h) => bounds.extend(new kakao.maps.LatLng(h.lat, h.lng)))
+    map.current.setBounds(bounds, 60)
+  }, [ready, flyKey, houses])
 
   if (err) return <div className="dd-notice" style={{ margin: '1rem' }}>{err}</div>
   return <div ref={box} style={{ width: '100%', height }} role="application" aria-label="카카오맵 찻집 지도" />

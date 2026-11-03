@@ -62,9 +62,9 @@ function Chat() {
   const messages = useAppStore((s) => s.messages)
   const loading = useAppStore((s) => s.chatLoading)
   const sendMessage = useAppStore((s) => s.sendMessage)
-  const resetChat = useAppStore((s) => s.resetChat)
   const highlightOnMap = useAppStore((s) => s.highlightOnMap)
   const navigate = useNavigate()
+  const resetChat = useAppStore((s) => s.resetChat)
   const [input, setInput] = useState('')
   const lastMsg = messages[messages.length - 1]
   const showFollowUps = !loading && lastMsg?.role === 'assistant' && !lastMsg.error
@@ -105,7 +105,7 @@ function Chat() {
                 <div className="mt-2">
                   <button type="button" className="btn btn-sm btn-outline-primary"
                     onClick={() => { highlightOnMap(m.houses); navigate('/map') }}>
-                    <i className="bi bi-geo-alt me-1" aria-hidden="true" />추천한 찻집 {m.houses.length}곳 3D 지도에서 보기
+                    <i className="bi bi-geo-alt me-1" aria-hidden="true" />추천한 찻집 {m.houses.length}곳 실제 지도에서 보기
                   </button>
                 </div>
               )}

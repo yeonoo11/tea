@@ -4,7 +4,7 @@ import PageHeader from '../components/PageHeader'
 import FilterBar from '../components/FilterBar'
 import TeaCard from '../components/TeaCard'
 import { Empty, Loading } from '../components/Status'
-import { matchesFilters } from '../data/filters'
+import { matchesFilters, sortHouses } from '../data/filters'
 import { useAppStore } from '../store/useAppStore'
 
 // 찻집 찾기 — 조건(지역·분위기·메뉴)을 고르면 카드가 바로 걸러져요
@@ -12,12 +12,12 @@ export default function TeaList() {
   const { teaHouses, teaLoading, teaError, loadTeaHouses } = useAppStore()
   const [params] = useSearchParams()   // 홈의 지역 버튼에서 /tea?region=애월 처럼 넘어와요
   const [filters, setFilters] = useState({
-    region: params.get('region') ?? '', mood: params.get('mood') ?? '', kind: params.get('kind') ?? '', q: params.get('q') ?? '',
+    sort: '', region: params.get('region') ?? '', mood: params.get('mood') ?? '', kind: params.get('kind') ?? '', q: params.get('q') ?? '',
   })
 
   useEffect(() => { loadTeaHouses() }, [loadTeaHouses])
 
-  const shown = useMemo(() => teaHouses.filter((h) => matchesFilters(h, filters)), [teaHouses, filters])
+  const shown = useMemo(() => sortHouses(teaHouses.filter((h) => matchesFilters(h, filters)), filters.sort), [teaHouses, filters])
 
   return (
     <>

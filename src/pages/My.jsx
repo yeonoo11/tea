@@ -1,7 +1,7 @@
 import { useEffect, useMemo } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import PageHeader from '../components/PageHeader'
-import Jeju3D from '../components/Jeju3D'
+import KakaoMap from '../components/KakaoMap'
 import { Empty, Loading } from '../components/Status'
 import { useAppStore } from '../store/useAppStore'
 
@@ -55,10 +55,10 @@ export default function My() {
         <section className="dd-mymap">
           <h2>나만의 제주 찻집 지도</h2>
           <div className="dd-frame">
-            <Jeju3D houses={saved} highlightIds={savedIds} flyKey={savedIds.join(',')}
+            <KakaoMap houses={saved} highlightIds={savedIds} flyKey={savedIds.join(',')}
               onSelect={(h) => navigate(`/tea/${h.id}`)} height="min(60vh, 460px)" />
           </div>
-          <div className="dd-map-meta">북마크한 찻집 {saved.length}곳이에요 · 집을 누르면 상세 페이지로 가요</div>
+          <div className="dd-map-meta">북마크한 찻집 {saved.length}곳이에요 · 핀을 누르면 상세 페이지로 가요</div>
         </section>
       )}
 
