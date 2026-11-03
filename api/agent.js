@@ -135,7 +135,7 @@ export default async function handler(req, res) {
     for (let turn = 0; turn < 6; turn++) {
       const r = await client.messages.create({
         model: MODEL,
-        max_tokens: 1024,
+        max_tokens: 4096,
         system: SYSTEM,
         tools,
         messages,
