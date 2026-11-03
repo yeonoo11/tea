@@ -4,7 +4,7 @@ import * as THREE from 'three'
 import { TeapotGeometry } from 'three/addons/geometries/TeapotGeometry.js'
 import { ParametricGeometry } from 'three/addons/geometries/ParametricGeometry.js'
 import { Ink, Paint } from './Paint'
-import { BAMBOO, CLAY, KETTLE, CUP, FAIR, LEAVES, PORCELAIN, SAUCER, SMALLCUP, TRAY, WALNUT, WALNUT_DARK, WASTE, WOOD, BOWL, boatPoint } from './wareShapes'
+import { BAMBOO, CLAY, KETTLE, CUP, FAIR, LEAVES, LID, PORCELAIN, SAUCER, SMALLCUP, TRAY, WALNUT, WALNUT_DARK, WASTE, WOOD, BOWL, boatPoint } from './wareShapes'
 
 
 // 단면 점들을 빙 돌려서 그릇 모양을 만드는 도우미 (LatheGeometry)
