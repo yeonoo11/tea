@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { Button, Card, Col, Form, InputGroup, Row, Spinner, Tab, Tabs } from 'react-bootstrap'
 import PageHeader from '../components/PageHeader'
 import TeaWareViewer from '../components/TeaWareViewer'
@@ -37,6 +37,8 @@ function Chat() {
   const messages = useAppStore((s) => s.messages)
   const loading = useAppStore((s) => s.chatLoading)
   const sendMessage = useAppStore((s) => s.sendMessage)
+  const highlightOnMap = useAppStore((s) => s.highlightOnMap)
+  const navigate = useNavigate()
   const [input, setInput] = useState('')
 
   function onSubmit(e) {
@@ -70,6 +72,14 @@ function Chat() {
                 </div>
               )}
               {m.text}
+              {m.houses?.length > 0 && (
+                <div className="mt-2">
+                  <button type="button" className="btn btn-sm btn-outline-primary"
+                    onClick={() => { highlightOnMap(m.houses); navigate('/map') }}>
+                    <i className="bi bi-geo-alt me-1" aria-hidden="true" />추천한 찻집 {m.houses.length}곳 3D 지도에서 보기
+                  </button>
+                </div>
+              )}
             </div>
           ))}
           {loading && <div className="small text-muted"><Spinner size="sm" className="me-2" />할망이 도구를 사용하는 중...</div>}

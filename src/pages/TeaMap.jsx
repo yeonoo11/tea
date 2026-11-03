@@ -11,7 +11,7 @@ import { useAppStore } from '../store/useAppStore'
 
 // 제주 지도 — 찻집 위치(실제 좌표)에 핀을 꽂고, 핀을 누르면 미리보기 카드가 떠요
 export default function TeaMap() {
-  const { teaHouses, teaLoading, teaError, selectedHouse, selectHouse, loadTeaHouses } = useAppStore()
+  const { teaHouses, teaLoading, teaError, selectedHouse, selectHouse, loadTeaHouses, mapHighlight, highlightOnMap } = useAppStore()
   const [filters, setFilters] = useState({ region: '', mood: '', kind: '' })
   // 3D 모형 ↔ 실제 카카오맵. 같은 찻집 목록·선택 상태를 쓰고, 주소(?view=real)로 바로 열 수도 있어요
   const [params, setParams] = useSearchParams()
@@ -21,6 +21,12 @@ export default function TeaMap() {
   useEffect(() => { loadTeaHouses() }, [loadTeaHouses])
 
   const shown = useMemo(() => teaHouses.filter((h) => matchesFilters(h, filters)), [teaHouses, filters])
+  // 설문대할망이 추천한 찻집 중 지금 지도에 보이는 곳
+  const picked = useMemo(() => {
+    const ids = new Set(mapHighlight?.ids ?? [])
+    return shown.filter((h) => ids.has(String(h.id)))
+  }, [shown, mapHighlight])
+  const pickedIds = useMemo(() => picked.map((h) => String(h.id)), [picked])
   // 필터로 가려진 찻집은 미리보기에서도 내려요 (지도와 결과가 항상 같게)
   const selected = selectedHouse && shown.some((h) => h.id === selectedHouse.id) ? selectedHouse : null
 
@@ -33,6 +39,15 @@ export default function TeaMap() {
           <button type="button" className={real ? '' : 'on'} aria-pressed={!real} onClick={() => setView('3d')}>3D 모형</button>
           <button type="button" className={real ? 'on' : ''} aria-pressed={real} onClick={() => setView('real')}>실제 지도</button>
         </div>
+        {picked.length > 0 && (
+          <div className="dd-picked">
+            <div className="ttl"><i className="bi bi-stars me-1" aria-hidden="true" />설문대할망이 추천한 찻집 {picked.length}곳</div>
+            <ul>
+              {picked.map((h) => <li key={h.id}><button type="button" onClick={() => selectHouse(h)}>{h.name}</button></li>)}
+            </ul>
+            <button type="button" className="clear" onClick={() => highlightOnMap(null)}>추천 표시 지우기</button>
+          </div>
+        )}
         <FilterBar value={filters} onChange={setFilters} stacked />
         <div className="dd-count" aria-live="polite">총 {shown.length}개의 찻집
           {shown.length !== teaHouses.length && ` (전체 ${teaHouses.length}곳 중)`}
@@ -48,9 +63,9 @@ export default function TeaMap() {
       <Col lg={8} xl={9} className="order-lg-2">
         <div className="dd-frame">
           {teaLoading ? <Loading text="찻집을 찾는 중..." /> : real ? (
-            <KakaoMap houses={shown} selectedId={selected?.id} onSelect={selectHouse} height="min(72vh, max(440px, 70vw))" />
+            <KakaoMap houses={shown} selectedId={selected?.id} onSelect={selectHouse} highlightIds={pickedIds} height="min(72vh, max(440px, 70vw))" />
           ) : (
-            <Jeju3D houses={shown} selectedId={selected?.id} onSelect={selectHouse} height="min(72vh, max(440px, 70vw))" />
+            <Jeju3D houses={shown} selectedId={selected?.id} onSelect={selectHouse} highlightIds={pickedIds} flyKey={mapHighlight?.key} height="min(72vh, max(440px, 70vw))" />
           )}
         </div>
         <div className="dd-map-meta">

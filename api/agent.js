@@ -103,6 +103,8 @@ export default async function handler(req, res) {
   const { message, history = [] } = req.body ?? {};
   const messages = [...history.slice(-10), { role: 'user', content: message }]; // 최근 10개만 보내 비용 절약
   const steps = []; // 화면에 "에이전트가 무엇을 했는지" 보여주기용
+  const seen = new Map(); // 도구로 찾은 찻집 (id → 찻집). 답변에 이름이 나온 곳을 지도에 표시하는 데 써요
+  const mentioned = (answer) => [...seen.values()].filter((h) => answer.includes(h.name)).map((h) => h.id);
 
   try {
     // ③ 에이전트 루프: 생각 → 도구 호출 → 결과 확인 → (반복) → 최종 답
@@ -117,7 +119,7 @@ export default async function handler(req, res) {
 
       if (r.stop_reason !== 'tool_use') {
         const answer = r.content.filter((b) => b.type === 'text').map((b) => b.text).join('\n');
-        return res.status(200).json({ answer, steps });
+        return res.status(200).json({ answer, steps, houses: mentioned(answer) });
       }
 
       messages.push({ role: 'assistant', content: r.content }); // Claude의 도구 호출 요청을 대화에 기록
@@ -127,6 +129,7 @@ export default async function handler(req, res) {
         let result;
         try { result = await runTool[block.name](block.input ?? {}); }
         catch (e) { result = { error: e.message }; }
+        if (block.name === 'search_tea_houses' && Array.isArray(result)) result.forEach((h) => seen.set(h.id, h));
         steps.push({ tool: block.name, args: block.input, count: Array.isArray(result) ? result.length : 0, error: result?.error });
         results.push({ type: 'tool_result', tool_use_id: block.id, content: JSON.stringify(result) });
       }

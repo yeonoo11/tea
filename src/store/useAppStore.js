@@ -102,6 +102,9 @@ export const useAppStore = create(
       teaError: '',
       selectedHouse: null,
       selectHouse: (selectedHouse) => set({ selectedHouse }),
+      // 설문대할망이 추천한 찻집 — 지도에서 이 집들을 밝히고 카메라가 그쪽으로 날아가요 ({ ids, key })
+      mapHighlight: null,
+      highlightOnMap: (ids) => set({ mapHighlight: ids?.length ? { ids: ids.map(String), key: Date.now() } : null }),
       loadTeaHouses: async () => {
         if (get().teaHouses.length || get().teaLoading) return
         set({ teaLoading: true, teaError: '' })
@@ -117,8 +120,8 @@ export const useAppStore = create(
         const history = get().messages.filter((m) => !m.error).map((m) => ({ role: m.role, content: m.text }))  // Claude 형식
         set({ messages: [...get().messages, { role: 'user', text }], chatLoading: true })
         try {
-          const { answer, steps } = await askAgent(text, history)
-          set({ messages: [...get().messages, { role: 'assistant', text: answer, steps }] })
+          const { answer, steps, houses } = await askAgent(text, history)
+          set({ messages: [...get().messages, { role: 'assistant', text: answer, steps, houses }] })
         } catch (e) {
           // 실패해도 채팅창에 할망의 말로 남겨요 (토스트는 금방 사라져서)
           set({ messages: [...get().messages, { role: 'assistant', text: e.message, error: true }] })

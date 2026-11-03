@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from 'react'
-import { Canvas, useThree } from '@react-three/fiber'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { OrbitControls, Html } from '@react-three/drei'
 import * as THREE from 'three'
 import { REGIONS } from '../../server/regions.js'
@@ -157,10 +157,10 @@ function Hallasan() {
 }
 
 // 찻집: 제주 전통 찻집 한 채와 소품. 마우스를 올리면 살짝 밝아지고, 누르면 onSelect 로 정보가 열려요 (찻주전자 모양 집은 TeapotHouse3D.jsx 에 남겨 뒀어요)
-function Pin({ house, pos, selected, onSelect }) {
+function Pin({ house, pos, selected, highlight, onSelect }) {
   const [hover, setHover] = useState(false)
   const [x, z] = pos
-  const active = selected || hover
+  const active = selected || hover || highlight
   return (
     <group position={[x, SURFACE + heightAt(x, z), z]} scale={active ? 1.6 : 1.2}
       onClick={(e) => { e.stopPropagation(); onSelect(house) }}
@@ -171,7 +171,7 @@ function Pin({ house, pos, selected, onSelect }) {
         <sphereGeometry args={[0.34, 12, 10]} />
         <meshBasicMaterial transparent opacity={0} depthWrite={false} />
       </mesh>
-      <TeaHouse3D id={house.id} selected={selected} glow={active} />
+      <TeaHouse3D id={house.id} selected={selected || highlight} glow={active} />
       <TeaVillageDecor id={house.id} />
       {active && (
         <Html position={[0, 0.62, 0]} center distanceFactor={9} style={{ pointerEvents: 'none' }}>
@@ -205,10 +205,51 @@ function FitCamera() {
   return null
 }
 
-export default function Jeju3D({ houses = [], selectedId, onSelect, height = 520 }) {
+// 추천·북마크한 찻집들이 있으면 카메라가 그쪽으로 부드럽게 날아가요. flyKey 가 바뀔 때마다 다시 날아가고, 도착하면 마우스로 자유롭게 돌려 볼 수 있어요.
+const NONE = []   // 기본값을 매번 새로 만들지 않게
+
+function FlyTo({ goal, flyKey }) {
+  const camera = useThree((s) => s.camera)
+  const controls = useThree((s) => s.controls)
+  const anim = useRef(null)
+  const goalRef = useRef(goal)
+  goalRef.current = goal
+  const hasGoal = Boolean(goal)
+  useEffect(() => {
+    const goal = goalRef.current
+    if (!goal || !controls) return
+    const dist = Math.min(15, Math.max(8, 5 + goal.spread * 1.3))
+    const dir = new THREE.Vector3(0.45, 0.62, 0.64).normalize().multiplyScalar(dist)
+    const to = new THREE.Vector3(goal.x, 0, goal.z)
+    anim.current = { t: 0, to, pos: to.clone().add(dir) }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [flyKey, controls, hasGoal])
+  useFrame((_, dt) => {
+    const a = anim.current
+    if (!a || !controls) return
+    a.t += dt
+    const f = 1 - Math.exp(-dt * 3.5)
+    controls.target.lerp(a.to, f)
+    camera.position.lerp(a.pos, f)
+    controls.update()
+    if (a.t > 2.2) anim.current = null
+  })
+  return null
+}
+
+export default function Jeju3D({ houses = [], selectedId, onSelect, highlightIds = NONE, flyKey, height = 520 }) {
   const { top, under } = useIslandGeometries()
   const { pines, citrus, canola } = useScenery()
   const pinPos = useMemo(() => spreadPins(houses), [houses])
+  const lit = useMemo(() => new Set(highlightIds.map(String)), [highlightIds])
+  // 밝힐 찻집들의 한가운데와 흩어진 정도 (카메라가 어디로 얼마나 가까이 갈지)
+  const goal = useMemo(() => {
+    const pts = houses.filter((h) => lit.has(String(h.id))).map((h) => pinPos.get(h.id)).filter(Boolean)
+    if (!pts.length) return null
+    const x = pts.reduce((s, p) => s + p[0], 0) / pts.length
+    const z = pts.reduce((s, p) => s + p[1], 0) / pts.length
+    return { x, z, spread: Math.max(...pts.map((p) => Math.hypot(p[0] - x, p[1] - z))) }
+  }, [houses, lit, pinPos])
   const brick = useMemo(() => makeBrickTexture(), [])
   const topMaterials = useMemo(() => [
     new THREE.MeshToonMaterial({ color: C.grass, gradientMap: ramp }),
@@ -221,6 +262,7 @@ export default function Jeju3D({ houses = [], selectedId, onSelect, height = 520
       </svg>
     <Canvas camera={{ position: [7, 7.6, 10], fov: 50 }} style={{ height }}>
       <FitCamera />
+      <FlyTo goal={goal} flyKey={flyKey} />
       <color attach="background" args={[C.bg]} />
       <fog attach="fog" args={[C.bg, 30, 80]} />
       <hemisphereLight args={['#fff4e2', '#e3d3b8', 2.0]} />
@@ -265,13 +307,13 @@ export default function Jeju3D({ houses = [], selectedId, onSelect, height = 520
       })}
 
       {houses.map((h) => (
-        <Pin key={h.id} house={h} pos={pinPos.get(h.id)} selected={h.id === selectedId} onSelect={onSelect} />
+        <Pin key={h.id} house={h} pos={pinPos.get(h.id)} selected={h.id === selectedId} highlight={lit.has(String(h.id))} onSelect={onSelect} />
       ))}
 
       <Cloud position={[-5.5, 4.2, -3]} />
       <Cloud position={[5, 4.8, 2]} />
       <Cloud position={[1, 5.2, -5]} />
-      <OrbitControls maxPolarAngle={Math.PI / 2.2} minDistance={4} maxDistance={45} />   {/* 마우스로 돌리기·확대 */}
+      <OrbitControls makeDefault maxPolarAngle={Math.PI / 2.2} minDistance={4} maxDistance={45} />   {/* 마우스로 돌리기·확대 */}
     </Canvas>
     </div>
   )

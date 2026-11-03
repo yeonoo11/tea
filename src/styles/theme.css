@@ -387,3 +387,12 @@ a:hover { color: var(--dd-accent); }
 .dd-viewtoggle button.on { background: var(--dd-main); color: #fff; font-weight: 600; }
 .dd-preview .actions { display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: 1rem; }
 .dd-preview .actions .btn { flex: 1 1 auto; white-space: nowrap; }
+
+/* ── 설문대할망 추천 · 내 북마크 지도 ─────────────────── */
+.dd-picked { background: #fff8e6; border: 1px solid #ecd9a6; border-radius: 14px; padding: .8rem 1rem; margin-bottom: 1rem; }
+.dd-picked .ttl { font-weight: 700; font-size: .92rem; color: var(--dd-main-deep); }
+.dd-picked ul { list-style: none; padding: 0; margin: .5rem 0; display: flex; flex-wrap: wrap; gap: .35rem; }
+.dd-picked li button { border: 1px solid #e3c978; background: #fff; border-radius: 999px; padding: .1rem .7rem; font-size: .82rem; color: var(--dd-text); }
+.dd-picked .clear { border: 0; background: none; padding: 0; font-size: .8rem; color: var(--dd-muted); text-decoration: underline; }
+.dd-mymap { margin-bottom: 1.5rem; }
+.dd-mymap h2 { font-size: 1.15rem; margin: 0 0 .6rem; }
