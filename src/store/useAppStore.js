@@ -129,6 +129,7 @@ export const useAppStore = create(
           set({ chatLoading: false })
         }
       },
+      resetChat: () => set({ messages: [], chatLoading: false }),   // 처음으로 — 대화를 지우고 시작 화면으로
     }),
     {
       name: 'jeju-ip-store',                          // localStorage 키 이름

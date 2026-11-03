@@ -32,14 +32,42 @@ export default function Agent() {
   )
 }
 
+// 답 아래에 이어서 물어볼 질문 후보. keys 가 지금까지의 대화에 나오면 점수를 받아 먼저 보여 줘요.
+const FOLLOW_UPS = [
+  { q: '애월에서 조용한 찻집 추천해 줘', keys: ['찻집', '애월', '조용'] },
+  { q: '비 오는 날 서귀포에서 갈 만한 찻집은?', keys: ['비', '서귀포', '날씨'] },
+  { q: '오늘 제주 날씨 어때요?', keys: ['날씨', '비', '바람'] },
+  { q: '차를 처음 마셔 보려는데 어떤 차부터 시작하면 좋을까요?', keys: ['처음', '입문', '종류'] },
+  { q: '차 마실 때 지켜야 할 기본 예절을 알려 주세요', keys: ['예절', '찻잔', '잔'] },
+  { q: '녹차를 맛있게 우리는 방법을 알려 주세요', keys: ['우리', '물 온도', '온도'] },
+  { q: '홍차랑 녹차는 뭐가 달라요?', keys: ['홍차', '녹차', '종류', '카페인'] },
+  { q: '귤피차는 어떤 차예요?', keys: ['귤', '허브', '대용차'] },
+  { q: '제주공항에서 가까운 찻집은 어디예요?', keys: ['공항', '이동', '분'] },
+  { q: '설문대할망 이야기를 들려주세요', keys: ['할망', '설화', '오름'] },
+]
+
+// 지금 대화에서 아직 묻지 않은 질문 3개를 고릅니다
+function pickFollowUps(messages) {
+  const asked = new Set(messages.filter((m) => m.role === 'user').map((m) => m.text))
+  const last = messages.slice(-2).map((m) => m.text).join(' ')
+  return FOLLOW_UPS
+    .filter((f) => !asked.has(f.q))
+    .map((f) => ({ ...f, score: f.keys.filter((k) => last.includes(k)).length }))
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 3)
+}
+
 // 설문대할망 AI 에이전트와 대화
 function Chat() {
   const messages = useAppStore((s) => s.messages)
   const loading = useAppStore((s) => s.chatLoading)
   const sendMessage = useAppStore((s) => s.sendMessage)
+  const resetChat = useAppStore((s) => s.resetChat)
   const highlightOnMap = useAppStore((s) => s.highlightOnMap)
   const navigate = useNavigate()
   const [input, setInput] = useState('')
+  const lastMsg = messages[messages.length - 1]
+  const showFollowUps = !loading && lastMsg?.role === 'assistant' && !lastMsg.error
 
   function onSubmit(e) {
     e.preventDefault()
@@ -50,6 +78,13 @@ function Chat() {
 
   return (
     <>
+      {messages.length > 0 && (
+        <div className="d-flex justify-content-end mb-2">
+          <button type="button" className="btn btn-sm btn-outline-primary" disabled={loading} onClick={resetChat}>
+            <i className="bi bi-arrow-counterclockwise me-1" aria-hidden="true" />처음으로
+          </button>
+        </div>
+      )}
       <Card className="chat-box mb-3">
         <Card.Body>
           {messages.length === 0 && (
@@ -82,6 +117,16 @@ function Chat() {
               )}
             </div>
           ))}
+          {showFollowUps && (
+            <div className="dd-followups">
+              <div className="small text-muted mb-2">이어서 이런 것도 물어보렴</div>
+              <div className="d-flex flex-wrap gap-2">
+                {pickFollowUps(messages).map((f) => (
+                  <button key={f.q} type="button" className="dd-starter" onClick={() => sendMessage(f.q)}>{f.q}</button>
+                ))}
+              </div>
+            </div>
+          )}
           {loading && <div className="small text-muted"><Spinner size="sm" className="me-2" />할망이 도구를 사용하는 중...</div>}
         </Card.Body>
       </Card>

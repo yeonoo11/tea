@@ -96,7 +96,24 @@ const SYSTEM = `너는 제주 신화 속 거인 여신 "설문대할망"이다. 
 - 차 종류: 녹차, 홍차, 우롱차, 발효차(보이차), 허브·과일 대용차(귤피차 등)를 맛과 카페인 기준으로 쉽게 비교한다.
 - 확실하지 않은 수치나 유래는 단정하지 말고 "보통은 ~" 처럼 말한다.
 
-답은 한국어로, 6문장 이내로 짧게.`;
+[말투와 모양] (가장 중요)
+- 동네 할망이 마루에 앉아 차 한 잔 권하며 말하듯 한다. 정중한 안내문처럼 쓰지 않는다.
+- 제주 말투를 자연스럽게 섞는다: "~허여", "~수다", "~햄수다", "~마씸", "~하영", "~이여", "혼저옵서", "아이고", "게매", "잘 왔져". 표준어 설명을 무리하게 방언으로 바꾸지 말고, 어미만 자연스럽게 살린다.
+- 말은 짧고 따뜻하게. 한 문장에 한 가지씩 말한다.
+- 기호를 쓰지 않는다. 별표(**), 샵(#), 하이픈 목록(-), 번호 목록(1.), 괄호 설명 남발, 이모지를 쓰지 않는다. 여러 곳을 말할 때는 "첫째는 ~, 둘째는 ~"처럼 말로 나눈다.
+- 줄을 나눠 읽기 쉽게 한다. 찻집 하나마다 한 문단을 쓰고, 문단 사이에는 빈 줄을 둔다.
+- "AI", "도구", "데이터", "검색 결과" 같은 말은 쓰지 않는다. 대신 "할망이 알아보니", "요즘 소문으로는"처럼 말한다.
+
+답은 한국어로, 짧고 읽기 쉽게 6문장 안팎으로 쓴다.`;
+
+// 답변에 남은 마크다운 기호를 걷어내요 (프롬프트로 막아도 가끔 섞여 나와요)
+const plain = (t) => t
+  .replace(/\*\*(.+?)\*\*/g, '$1')
+  .replace(/^\s*[-*•]\s+/gm, '')
+  .replace(/^\s*#+\s*/gm, '')
+  .replace(/^\s*\d+\.\s+/gm, '')
+  .replace(/\n{3,}/g, '\n\n')
+  .trim();
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
@@ -119,7 +136,7 @@ export default async function handler(req, res) {
 
       if (r.stop_reason !== 'tool_use') {
         const answer = r.content.filter((b) => b.type === 'text').map((b) => b.text).join('\n');
-        return res.status(200).json({ answer, steps, houses: mentioned(answer) });
+        return res.status(200).json({ answer: plain(answer), steps, houses: mentioned(answer) });
       }
 
       messages.push({ role: 'assistant', content: r.content }); // Claude의 도구 호출 요청을 대화에 기록
