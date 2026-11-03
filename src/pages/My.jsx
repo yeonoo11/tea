@@ -63,7 +63,7 @@ export default function My() {
       )}
 
       {favLoading ? <Loading /> : favorites.length === 0 ? (
-        <Empty text="아직 북마크한 찻집이 없어요. 찻집 카드의 북마크 버튼을 눌러 보세요." />
+        <Empty text={<>아직 북마크한 찻집이 없어요. <Link to="/tea">찻집 카드</Link>의 북마크 버튼을 눌러 보세요.</>} />
       ) : (
         <ul className="dd-fav-list">
           {favorites.map((f) => (
