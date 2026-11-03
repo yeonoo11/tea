@@ -30,8 +30,17 @@ export const fetchTeaHouses = (region = '') =>
   get(`/api/teahouses?region=${encodeURIComponent(region)}`)          // 카카오 로컬
 export const fetchReviews = (query) =>
   get(`/api/reviews?query=${encodeURIComponent(query)}`)              // 네이버 블로그
-export const fetchPhotos = ({ name, region }) =>
-  get(`/api/photos?name=${encodeURIComponent(name)}&region=${encodeURIComponent(region || '')}`)  // 카카오 이미지 검색
+// 카카오 이미지 검색 — 카드 목록과 상세가 같은 사진을 다시 찾지 않도록 브라우저에서도 기억해 둬요 (실패하면 다시 시도할 수 있게 지워요)
+const photoCache = new Map()
+export const fetchPhotos = ({ name, region }) => {
+  const key = `${region || ''}|${name}`
+  if (!photoCache.has(key)) {
+    const p = get(`/api/photos?name=${encodeURIComponent(name)}&region=${encodeURIComponent(region || '')}`)
+    p.catch(() => photoCache.delete(key))
+    photoCache.set(key, p)
+  }
+  return photoCache.get(key)
+}
 export const fetchTravel = ({ fromLng, fromLat, toLng, toLat }) =>
   get(`/api/travel?fromLng=${fromLng}&fromLat=${fromLat}&toLng=${toLng}&toLat=${toLat}`)  // OSRM
 export const fetchWeather = (place = '제주시') =>
