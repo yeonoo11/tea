@@ -371,3 +371,19 @@ a:hover { color: var(--dd-accent); }
 
 .chat-box .msg.error { background: rgba(191, 134, 96, .16); border: 1px dashed var(--dd-accent); }
 
+
+/* ── 실제 사진 · 지도 전환 ─────────────────────────────── */
+.dd-photo-wrap { display: block; margin-bottom: 1.2rem; }
+.dd-preview .dd-photo-wrap { margin-bottom: 0; padding-bottom: .7rem; }
+.dd-photo-thumbs { display: flex; gap: .5rem; padding: .6rem 0 0; }
+.dd-preview .dd-photo-thumbs, .dd-preview .dd-photo-credit { padding-left: 1.1rem; padding-right: 1.1rem; }
+.dd-photo-thumbs button { padding: 0; border: 2px solid transparent; border-radius: 10px; overflow: hidden; background: var(--dd-sub); width: 64px; min-width: 0; height: 48px; flex: 0 1 64px; }
+.dd-photo-thumbs button.on { border-color: var(--dd-main); }
+.dd-photo-thumbs img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.dd-photo-credit { font-size: .78rem; color: var(--dd-muted); margin: .5rem 0 0; }
+.dd-photo-credit a { color: inherit; text-decoration: underline; }
+.dd-viewtoggle { display: inline-flex; border: 1px solid var(--dd-line); border-radius: 999px; overflow: hidden; margin-bottom: 1rem; background: #fff; }
+.dd-viewtoggle button { border: 0; background: none; padding: .35rem 1.1rem; font-size: .9rem; color: var(--dd-main-deep); }
+.dd-viewtoggle button.on { background: var(--dd-main); color: #fff; font-weight: 600; }
+.dd-preview .actions { display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: 1rem; }
+.dd-preview .actions .btn { flex: 1 1 auto; white-space: nowrap; }

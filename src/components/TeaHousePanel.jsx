@@ -1,24 +1,19 @@
 import { Link } from 'react-router-dom'
-import { ListGroup } from 'react-bootstrap'
 import { useAppStore } from '../store/useAppStore'
 import { useTeaExtras } from '../hooks/useTeaExtras'
-import { Loading } from './Status'
-import { artOf } from '../data/houseArt'
+import HousePhoto from './HousePhoto'
 import { featureOf } from '../data/filters'
 
 // 핀을 누르면 나오는 "찻집 미리보기" 카드
-// 기본 정보(카카오) + 후기(네이버 블로그) + 제주공항에서 이동 시간(OSRM)
-export default function TeaHousePanel({ house }) {
+// 기본 정보·사진(카카오) + 제주공항에서 이동 시간(OSRM). 후기는 카카오맵 링크로 연결해요
+export default function TeaHousePanel({ house, real = false, onToggleView }) {
   const addFavorite = useAppStore((s) => s.addFavorite)
-  const { reviews, travel } = useTeaExtras(house)
+  const { travel, photos } = useTeaExtras(house)
   const feature = featureOf(house)
 
   return (
     <article className="dd-preview">
-      <div className="photo">
-        <img src={`/images/dadam/${artOf(house)}.png`} alt="" />
-        <span className="example">예시 일러스트</span>
-      </div>
+      <HousePhoto house={house} photos={photos} />
       <div className="body">
         <div className="top">
           <h2>{house.name}</h2>
@@ -44,24 +39,18 @@ export default function TeaHousePanel({ house }) {
           <li><span className="k">주소</span><span>{house.address}</span></li>
         </ul>
 
-        <Link to={`/tea/${house.id}`} className="btn btn-primary w-100 mb-3">상세 보기</Link>
+        <div className="actions">
+          <Link to={`/tea/${house.id}`} className="btn btn-primary">상세 보기</Link>
+          {onToggleView && (
+            <button type="button" className="btn btn-outline-primary" onClick={onToggleView}>
+              <i className={`bi ${real ? 'bi-box' : 'bi-map'} me-1`} aria-hidden="true" />{real ? '3D 모형에서 보기' : '실제 지도에서 보기'}
+            </button>
+          )}
+        </div>
 
-        <div className="fw-bold small mb-1">블로그 후기</div>
-        {!reviews ? <Loading text="후기 찾는 중..." /> : reviews.error ? (
-          <div className="small text-muted">지금은 불러올 수 없어요. <a href={house.url} target="_blank" rel="noreferrer">카카오맵에서 후기 보기</a></div>
-        ) : reviews.length === 0 ? (
-          <div className="small text-muted">후기를 찾지 못했어요.</div>
-        ) : (
-          <ListGroup variant="flush">
-            {reviews.slice(0, 2).map((r) => (
-              <ListGroup.Item key={r.link} action href={r.link} target="_blank" rel="noreferrer"
-                className="px-0 bg-transparent">
-                <div className="small fw-bold">{r.title}</div>
-                <div className="small text-muted text-truncate">{r.summary}</div>
-              </ListGroup.Item>
-            ))}
-          </ListGroup>
-        )}
+        <a className="small fw-bold" href={house.url} target="_blank" rel="noreferrer">
+          <i className="bi bi-chat-square-text me-1" aria-hidden="true" />카카오맵에서 후기 보기
+        </a>
       </div>
     </article>
   )

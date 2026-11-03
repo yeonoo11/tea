@@ -26,7 +26,7 @@ export default function RootLayout() {
   return (
     <div className="d-flex flex-column min-vh-100">
       <Navbar expand="md" className="dd-nav" collapseOnSelect sticky="top">
-        <Container>
+        <Container fluid={wide} className={wide ? 'px-3 px-lg-4' : undefined}>
           <Navbar.Brand as={NavLink} to="/">다담록<Leaf /></Navbar.Brand>
           <Navbar.Toggle aria-controls="main-nav" aria-label="메뉴 열기" />
           <Navbar.Collapse id="main-nav">
@@ -69,7 +69,7 @@ export default function RootLayout() {
             차를 담다, 제주를 만나다.
           </div>
           <div className="text-md-end">
-            데이터 출처: 카카오 로컬 · 네이버 검색 · OSRM · 기상청<br />
+            데이터 출처: 카카오 로컬·이미지 검색 · OSRM · 기상청<br />
             제주대 청년도약 부트캠프 1기 프로젝트
           </div>
         </Container>

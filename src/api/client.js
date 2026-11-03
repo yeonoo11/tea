@@ -30,6 +30,8 @@ export const fetchTeaHouses = (region = '') =>
   get(`/api/teahouses?region=${encodeURIComponent(region)}`)          // 카카오 로컬
 export const fetchReviews = (query) =>
   get(`/api/reviews?query=${encodeURIComponent(query)}`)              // 네이버 블로그
+export const fetchPhotos = ({ name, region }) =>
+  get(`/api/photos?name=${encodeURIComponent(name)}&region=${encodeURIComponent(region || '')}`)  // 카카오 이미지 검색
 export const fetchTravel = ({ fromLng, fromLat, toLng, toLat }) =>
   get(`/api/travel?fromLng=${fromLng}&fromLat=${fromLat}&toLng=${toLng}&toLat=${toLat}`)  // OSRM
 export const fetchWeather = (place = '제주시') =>

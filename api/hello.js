@@ -7,6 +7,6 @@ export default function handler(req, res) {
     hasDataKey: Boolean(process.env.DATA_GO_KR_KEY),
     hasClaudeKey: Boolean(process.env.ANTHROPIC_API_KEY),
     hasKakaoKey: Boolean(process.env.KAKAO_REST_API_KEY),
-    hasNaverKey: Boolean(process.env.NAVER_CLIENT_ID && process.env.NAVER_CLIENT_SECRET),
+    hasNaverKey: Boolean((process.env.NAVER_HUB_CLIENT_ID && process.env.NAVER_HUB_CLIENT_SECRET) || (process.env.NAVER_CLIENT_ID && process.env.NAVER_CLIENT_SECRET)),
   });
 }
