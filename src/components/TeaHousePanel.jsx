@@ -7,7 +7,8 @@ import { featureOf } from '../data/filters'
 // 핀을 누르면 나오는 "찻집 미리보기" 카드
 // 기본 정보·사진(카카오) + 제주공항에서 이동 시간(OSRM). 후기는 카카오맵 링크로 연결해요
 export default function TeaHousePanel({ house }) {
-  const addFavorite = useAppStore((s) => s.addFavorite)
+  const toggleTeaFavorite = useAppStore((s) => s.toggleTeaFavorite)
+  const isFav = useAppStore((s) => s.favorites.some((f) => f.source === 'tea' && String(f.item_id) === String(house.id)))
   const { travel, photos } = useTeaExtras(house)
   const feature = featureOf(house)
 
@@ -18,8 +19,8 @@ export default function TeaHousePanel({ house }) {
         <div className="top">
           <h2>{house.name}</h2>
           <button type="button" className="bookmark" aria-label={`${house.name} 북마크`}
-            onClick={() => addFavorite({ source: 'tea', id: house.id, title: house.name })}>
-            <i className="bi bi-bookmark" aria-hidden="true" />
+            onClick={() => toggleTeaFavorite({ id: house.id, title: house.name })}>
+            <i className={`bi ${isFav ? 'bi-bookmark-fill' : 'bi-bookmark'}`} aria-hidden="true" />
           </button>
         </div>
         <div className="dd-loc"><i className="bi bi-geo-alt-fill" aria-hidden="true" />제주 {house.region}</div>

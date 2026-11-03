@@ -88,6 +88,11 @@ export const useAppStore = create(
         set({ favorites: [data, ...get().favorites] })
         get().toast('북마크에 저장했어요')
       },
+      // 찻집 북마크 켜기/끄기 — 이미 저장돼 있으면 지우고, 없으면 저장해요
+      toggleTeaFavorite: ({ id, title }) => {
+        const found = get().favorites.find((f) => f.source === 'tea' && String(f.item_id) === String(id))
+        return found ? get().removeFavorite(found.id) : get().addFavorite({ source: 'tea', id, title })
+      },
       removeFavorite: async (favId) => {
         if (!supabase) return
         const { error } = await supabase.from('favorites').delete().eq('id', favId)

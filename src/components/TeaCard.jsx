@@ -28,11 +28,12 @@ function useShopPhoto(house) {
 
 // 찻집 카드: 이미지 · 이름 · 지역 · 특징 태그 · 상세 보기 · 북마크
 export default function TeaCard({ house }) {
-  const addFavorite = useAppStore((s) => s.addFavorite)
-  const feature = featureOf(house)
+  const toggleTeaFavorite = useAppStore((s) => s.toggleTeaFavorite)
   const [ref, found] = useShopPhoto(house)
   const [failed, setFailed] = useState(false)
   const photo = failed ? null : found
+  const isFav = useAppStore((s) => s.favorites.some((f) => f.source === 'tea' && String(f.item_id) === String(house.id)))
+  const feature = featureOf(house)
   return (
     <article className="dd-card">
       <Link ref={ref} to={`/tea/${house.id}`} className="photo" aria-label={`${house.name} 상세 보기`}>
@@ -50,8 +51,8 @@ export default function TeaCard({ house }) {
         <div className="top">
           <h3><Link to={`/tea/${house.id}`}>{house.name}</Link></h3>
           <button type="button" className="bookmark" aria-label={`${house.name} 북마크`}
-            onClick={() => addFavorite({ source: 'tea', id: house.id, title: house.name })}>
-            <i className="bi bi-bookmark" aria-hidden="true" />
+            onClick={() => toggleTeaFavorite({ id: house.id, title: house.name })}>
+            <i className={`bi ${isFav ? 'bi-bookmark-fill' : 'bi-bookmark'}`} aria-hidden="true" />
           </button>
         </div>
         <div className="loc"><i className="bi bi-geo-alt-fill" aria-hidden="true" />제주 {house.region}</div>

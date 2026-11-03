@@ -11,7 +11,8 @@ import { useAppStore } from '../store/useAppStore'
 export default function TeaDetail() {
   const { id } = useParams()
   const navigate = useNavigate()
-  const { teaHouses, teaLoading, loadTeaHouses, addFavorite, selectHouse } = useAppStore()
+  const { teaHouses, teaLoading, loadTeaHouses, toggleTeaFavorite, selectHouse } = useAppStore()
+  const isFav = useAppStore((s) => s.favorites.some((f) => f.source === 'tea' && String(f.item_id) === String(id)))
   const house = teaHouses.find((h) => String(h.id) === id)
   const { travel, photos } = useTeaExtras(house)
 
@@ -47,8 +48,8 @@ export default function TeaDetail() {
 
           <div className="dd-actions">
             <button type="button" className="btn btn-primary"
-              onClick={() => addFavorite({ source: 'tea', id: house.id, title: house.name })}>
-              <i className="bi bi-bookmark me-1" aria-hidden="true" />북마크
+              onClick={() => toggleTeaFavorite({ id: house.id, title: house.name })}>
+              <i className={`bi ${isFav ? 'bi-bookmark-fill' : 'bi-bookmark'} me-1`} aria-hidden="true" />{isFav ? '북마크 해제' : '북마크'}
             </button>
             <button type="button" className="btn btn-outline-primary"
               onClick={() => { selectHouse(house); navigate('/map') }}>

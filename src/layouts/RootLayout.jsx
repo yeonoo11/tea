@@ -19,8 +19,10 @@ export default function RootLayout() {
   const user = useAppStore((s) => s.user)
   const signOut = useAppStore((s) => s.signOut)
   const initAuth = useAppStore((s) => s.initAuth)
+  const loadFavorites = useAppStore((s) => s.loadFavorites)
   const { pathname } = useLocation()
   useEffect(() => { initAuth() }, [initAuth])   // 처음 한 번 로그인 여부를 확인해요
+  useEffect(() => { if (user) loadFavorites() }, [user, loadFavorites])   // 북마크 표시(채운 아이콘)를 위해 로그인하면 미리 불러와요
   const wide = pathname === '/map'   // 지도는 여백을 줄여 넓게
 
   return (
